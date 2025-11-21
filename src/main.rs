@@ -17,7 +17,7 @@ impl FrameIter {
     pub fn new(path: &str) -> Result<Self, ffmpeg::Error> {
         ffmpeg::init()?;
 
-        let mut ictx = format::input(&path)?;
+        let ictx = format::input(&path)?;
         let input = ictx
             .streams()
             .best(Type::Video)
@@ -83,17 +83,21 @@ fn main() -> Result<(), ffmpeg::Error> {
     ffmpeg::init().unwrap();
 
     let frames = FrameIter::new("videos/input.mp4")?;
-    let mut num_frames = 0;
-    for (i, frame) in frames.enumerate() {
-        println!(
-            "frame {}: {}x{} pts={:?}",
-            i,
-            frame.width(),
-            frame.height(),
-            frame.pts()
-        );
-        num_frames += 1;
+
+    let mut frame_list: Vec<(u32, u32, u32, u32)> = Vec::new();
+
+    for (_, _) in frames.enumerate() {
+        frame_list.push((
+            0,
+            0, 
+            50, 
+            50,
+        ));
     }
-    println!("{}", num_frames);
+
+
+    // println!("Frame_list: {:?}", frame_list);
+    println!("Total frames: {}", frame_list.len());
+
     Ok(())
 }
