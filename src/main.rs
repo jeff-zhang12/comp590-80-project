@@ -5,6 +5,8 @@ use ffmpeg::{
     frame,
     media::Type,
 };
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 
 pub struct FrameIter {
     ictx: format::context::Input,
@@ -84,20 +86,34 @@ fn main() -> Result<(), ffmpeg::Error> {
 
     let frames = FrameIter::new("videos/input.mp4")?;
 
-    let mut frame_list: Vec<(u32, u32, u32, u32)> = Vec::new();
+    // Load bounding boxes written by mapper.py (x1,y1,x2,y2 per line)
+    let mut bounding_boxes: Vec<(i32, i32, i32, i32)> = Vec::new();
 
-    for (_, _) in frames.enumerate() {
-        frame_list.push((
-            0,
-            0, 
-            50, 
-            50,
-        ));
-    }
+	if let Ok(file) = File::open("bounding_boxes.txt") {
+		let reader = BufReader::new(file);
+		for line_result in reader.lines() {
+			if let Ok(line) = line_result {
+				let parts: Vec<&str> = line.trim().split(',').collect();
+				if parts.len() == 4 {
+					let parsed = (
+						parts[0].parse::<i32>(),
+						parts[1].parse::<i32>(),
+						parts[2].parse::<i32>(),
+						parts[3].parse::<i32>(),
+					);
+					if let (Ok(x1), Ok(y1), Ok(x2), Ok(y2)) = parsed {
+						bounding_boxes.push((x1, y1, x2, y2));
+					}
+				}
+			}
+		}
+	} else {
+		eprintln!("could not open bounding_boxes.txt");
+	}
 
 
-    // println!("Frame_list: {:?}", frame_list);
-    println!("Total frames: {}", frame_list.len());
+    println!("Bounding boxes: {:?}", bounding_boxes);
+    println!("Total frames: {}", frames.count());
 
     Ok(())
 }
