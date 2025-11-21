@@ -6,10 +6,10 @@ fn main() {
 
     // Print FFmpeg version
     let version =  ffmpeg::util::version();
-    let config  = ffmpeg::util::configuration();
+    // let config  = ffmpeg::util::configuration();
 
     println!("FFmpeg version: {}", version);
-    println!("Config: {}", config);
+    // println!("Config: {}", config);
 
     let ids = [
         ffmpeg::codec::Id::H264,
