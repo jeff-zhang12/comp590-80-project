@@ -83,7 +83,7 @@ fn main() -> Result<(), ffmpeg::Error> {
     ffmpeg::init().unwrap();
 
     let frames = FrameIter::new("videos/input.mp4")?;
-
+    let mut num_frames = 0;
     for (i, frame) in frames.enumerate() {
         println!(
             "frame {}: {}x{} pts={:?}",
@@ -92,7 +92,8 @@ fn main() -> Result<(), ffmpeg::Error> {
             frame.height(),
             frame.pts()
         );
+        num_frames += 1;
     }
-
+    println!("{}", num_frames);
     Ok(())
 }
