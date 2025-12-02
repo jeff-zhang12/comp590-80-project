@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ffmpeg-next = "6"
+ffmpeg-next = { git = "https://github.com/zmwangx/rust-ffmpeg" }
