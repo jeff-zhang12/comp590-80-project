@@ -3,8 +3,8 @@ import cv2
 VIDEO_PATH = "videos/input.mp4"
 OUTPUT_FILE = "bounding_boxes.txt"
 
-box_width = 100
-box_height = 100
+box_width = 500
+box_height = 500
 
 mouse_x, mouse_y = 0, 0
 

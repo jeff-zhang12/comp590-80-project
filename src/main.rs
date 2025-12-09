@@ -30,13 +30,14 @@ fn load_bounding_boxes(path: &str) -> Result<Vec<(i32, i32, i32, i32)>> {
 }
 
 fn main() -> Result<()> {
+    let bounding_boxes = load_bounding_boxes("bounding_boxes.txt")?;
+
     // Run differential compression
-    if let Err(e) = compress_dynamic_roi("videos/input.mp4", "videos/output_dynamic.mp4") {
+    if let Err(e) = compress_dynamic_roi("videos/input.mp4", "videos/output_dynamic.mp4", &bounding_boxes) {
         eprintln!("Error during compression: {}", e);
     }
 
     let frames = FrameIter::new("videos/input.mp4").map_err(|e| anyhow::anyhow!(e))?;
-    let bounding_boxes = load_bounding_boxes("bounding_boxes.txt")?;
 
     // Verify synchronization
     let combined_iter = frames.zip(bounding_boxes.iter());
