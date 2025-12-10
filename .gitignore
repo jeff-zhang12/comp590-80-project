@@ -34,3 +34,13 @@ __pycache__/
 bounding_boxes.txt
 .venv/
 venv/
+
+# Temporary processing files
+temp_frames/
+
+# macOS
+.DS_Store
+
+# Generated output videos
+videos/output_dynamic.mp4
+videos/output*.mp4
