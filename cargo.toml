@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ffmpeg-next = "6"
+ffmpeg-next = "7"
 anyhow = "1.0"
 image = "0.25"
+rayon = "1.11.0"
+crossbeam-channel = "0.5.15"
