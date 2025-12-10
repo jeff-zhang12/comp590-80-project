@@ -4,11 +4,14 @@ use ffmpeg::{
     format,
     frame,
     media::Type,
+    software::scaling::{context::Context as ScalingContext, flag::Flags},
+    util::format::pixel::Pixel,
 };
 
 pub struct FrameIter {
     ictx: format::context::Input,
     decoder: codec::decoder::Video,
+    scaler: ScalingContext,
     video_stream_index: usize,
     finished: bool,
 }
@@ -27,9 +30,24 @@ impl FrameIter {
         let context_decoder = codec::Context::from_parameters(input.parameters())?;
         let decoder = context_decoder.decoder().video()?;
 
+        let width = decoder.width();
+        let height = decoder.height();
+
+        // Create scaler to convert to RGB24 for easier processing
+        let scaler = ScalingContext::get(
+            decoder.format(),
+            decoder.width(),
+            decoder.height(),
+            Pixel::RGB24,
+            width,
+            height,
+            Flags::BILINEAR,
+        )?;
+
         Ok(Self {
             ictx,
             decoder,
+            scaler,
             video_stream_index,
             finished: false,
         })
@@ -45,10 +63,17 @@ impl Iterator for FrameIter {
         }
 
         let mut decoded = frame::Video::empty();
+        let mut rgb_frame = frame::Video::empty();
 
         loop {
             if self.decoder.receive_frame(&mut decoded).is_ok() {
-                return Some(decoded);
+                // Convert to RGB24
+                if self.scaler.run(&decoded, &mut rgb_frame).is_ok() {
+                    return Some(rgb_frame);
+                } else {
+                    eprintln!("Frame scaling error");
+                    return Some(decoded); // Fallback to original frame
+                }
             }
 
             match self.ictx.packets().next() {
@@ -67,7 +92,9 @@ impl Iterator for FrameIter {
                         // ignore EOF error
                     }
                     if self.decoder.receive_frame(&mut decoded).is_ok() {
-                        return Some(decoded);
+                        if self.scaler.run(&decoded, &mut rgb_frame).is_ok() {
+                            return Some(rgb_frame);
+                        }
                     }
                     self.finished = true;
                     return None;
